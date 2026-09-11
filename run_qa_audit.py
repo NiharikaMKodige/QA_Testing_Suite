@@ -46,11 +46,19 @@ enh_images = sorted(
     ]
 )
 
-print(f"Running SIFT Feature Audit across {len(orig_images)} image pairs...\n")
+print(
+    f"Running SIFT Feature Audit across {len(orig_images)} Original and"
+    f" {len(enh_images)} Enhanced images...\n"
+)
 
+if len(orig_images) != len(enh_images):
+    print("Error: Number of original and enhanced images do not match!")
+    exit()
+
+# Map original paths directly to enhanced paths by index position to handle filename differences
 path_map = {orig: enh for orig, enh in zip(orig_images, enh_images)}
 
-# Ground Truth
+# Generate Ground Truth Matrix
 gt_data = []
 for img in orig_images:
     gt_data.append({"imageA": img, "imageB": img, "label": 1})
@@ -59,7 +67,7 @@ for imgA, imgB in itertools.combinations(orig_images, 2):
 
 pd.DataFrame(gt_data).to_csv("gt.csv", index=False)
 
-# Compute Original Metrics
+# Compute Metrics for Original Dataset
 orig_preds = []
 orig_matches = []
 for row in gt_data:
@@ -72,7 +80,7 @@ for row in gt_data:
 
 pd.DataFrame(orig_preds).to_csv("pred_orig.csv", index=False)
 
-# Compute Enhanced Metrics
+# Compute Metrics for Enhanced Dataset
 enh_preds = []
 enh_matches = []
 for row in gt_data:
@@ -87,12 +95,12 @@ for row in gt_data:
 
 pd.DataFrame(enh_preds).to_csv("pred_enh.csv", index=False)
 
-# Calculations
+# Calculate ROC-AUC and Keypoint Retention Metrics
 auc_orig = calc_roc_auc("pred_orig.csv", "gt.csv")
 auc_enh = calc_roc_auc("pred_enh.csv", "gt.csv")
 
-avg_orig_kp = np.mean(orig_matches)
-avg_enh_kp = np.mean(enh_matches)
+avg_orig_kp = np.mean(orig_matches) if orig_matches else 0
+avg_enh_kp = np.mean(enh_matches) if enh_matches else 0
 kp_diff = avg_enh_kp - avg_orig_kp
 kp_pct_change = (
     ((avg_enh_kp - avg_orig_kp) / avg_orig_kp) * 100 if avg_orig_kp > 0 else 0
@@ -112,14 +120,13 @@ print(
 
 if avg_enh_kp > avg_orig_kp:
     print(
-        "Verdict: PASS - Specular glare removal significantly improved usable"
-        " keypoint density."
+        "Verdict: PASS - Specular glare removal significantly improved keypoint"
+        " retention."
     )
 elif avg_enh_kp == avg_orig_kp:
     print("Verdict: NEUTRAL - No change in feature extraction.")
 else:
     print(
-        "Verdict: FAIL - Enhancement caused over-smoothing or loss of feature"
-        " descriptors."
+        "Verdict: FAIL - Enhancement introduced noise or over-smoothing"
+        " degradation."
     )
-    

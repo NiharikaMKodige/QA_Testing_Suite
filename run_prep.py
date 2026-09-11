@@ -1,21 +1,23 @@
 from pathlib import Path
 
-# Load original code
-with open(
-    r".\image_enhancement\14_final_preprocessing.py", encoding="utf-8"
-) as f:
+with open(r".\image_enhancement\14_final_preprocessing.py", encoding="utf-8") as f:
     code = f.read()
 
-# Replace paths cleanly
+# Replace paths
 code = code.replace(
     'INPUT_DIR = Path("dataset/train/images")',
-    'INPUT_DIR = Path(r".\\benchmark_set\\original")',
+    'INPUT_DIR = Path(r".\\benchmark_set\\original")'
 )
 code = code.replace(
     'OUTPUT_DIR = Path("outputs/final_preprocessed")',
-    'OUTPUT_DIR = Path(r".\\benchmark_set\\enhanced")',
+    'OUTPUT_DIR = Path(r".\\benchmark_set\\enhanced")'
 )
 
-# Execute in current scope
+# Overwrite extensions to include uppercase variants
+code = code.replace(
+    'extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}',
+    'extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".JPG", ".JPEG", ".PNG", ".BMP", ".WEBP"}'
+)
+
 exec(code)
-print("Enhancement complete! Images saved to benchmark_set\\enhanced")
+print("Enhancement complete! All images processed into benchmark_set\\enhanced")
