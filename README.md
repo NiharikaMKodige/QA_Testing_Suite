@@ -127,5 +127,3 @@ Verdict: PASS - Specular glare removal significantly improved keypoint retention
 * **`metric_calculation.py`:** Evaluates prediction outputs against ground truth data to derive ROC-AUC scores.
 * **`select_benchmark.py`:** Interfaces with external raw datasets (`Pet Biometric Challenge 2022`) to extract consistent test subsets for rapid algorithm validation.
 * **`run_prep.py`:** Bridges the QA suite with the `image_enhancement` module dynamically without requiring code modifications to the enhancement scripts.
-
-```
